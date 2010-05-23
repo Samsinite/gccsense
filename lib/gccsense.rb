@@ -155,7 +155,7 @@ module Redcar
           menu = ApplicationSWT::Menu.new(window.controller, builder.menu, nil, Swt::SWT::POP_UP)
           menu.move(absolute_x, absolute_y)
           menu.show
-#          FileUtils.rm(path)
+          FileUtils.rm(path)
         end
       end
       
