@@ -130,18 +130,19 @@ module Redcar
           line_str = line_str[0..(line_str.length-2)]
           line_split = line_str.split(/::|\.|->/)        
           prefix = ""
-          prefix = line_split.last unless line_split.length == 1
+          prefix = line_split.last unless line_str[line_str.length-1].chr =~ /:|\.|>/
           offset_at_line = doc.cursor_line_offset - prefix.length
           doc.replace(doc.cursor_offset - prefix.length, prefix.length, "")                
           File.open(path, "wb") {|f| f.print doc.to_s }
           doc.replace(doc.cursor_offset, 0, prefix)
+          doc.cursor_offset = doc.cursor_offset + prefix.length
           completions = get_completions(path, prefix, offset_at_line)
           
           cur_doc = doc
           builder = Menu::Builder.new do
             completions.each do |current_completion|            
               item(current_completion[0] + "\t" + current_completion[1]) do              
-                cur_doc.replace(cur_doc.cursor_offset, prefix.length, current_completion[0])
+                cur_doc.replace(cur_doc.cursor_offset - prefix.length, prefix.length, current_completion[0])
               end
             end
           end
