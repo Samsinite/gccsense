@@ -8,6 +8,7 @@ module Redcar
           sub_menu "GCCSense" do
             item "code completion", GCCSense::CodeCompleteCommand
             item "key binding", GCCSense::ChangeKeyComboCommand
+            item "change gccsense suffix", GCCSense::ChangeGccSuffix
           end
         end
       end
@@ -104,7 +105,7 @@ module Redcar
     
     class ChangeGccSuffix < Command
       def execute
-        result = Application::Dialog.input("GCCSense suffix", "Please enter gcc suffix (i.e. '-code-assist' => 'gcc-code-assist'))", Redcar::GCCSense.key_combo) do |text|
+        result = Application::Dialog.input("GCCSense suffix", "Please enter gcc suffix (i.e. '-code-assist' => 'gcc-code-assist'))", Redcar::GCCSense.suffix) do |text|
           unless text == ""
             nil
           else
@@ -123,6 +124,7 @@ module Redcar
       
       def execute
         path = doc.mirror.path.split(/\/|\\/)
+        log(path.join("/"))
         if path.last.split(".").last =~ /h|c|cpp|cc|cxx|CPP|CC|CXX/
           path[path.length-1]= ".gccsense." + path.last
           path = path.join("/")
@@ -132,6 +134,8 @@ module Redcar
           prefix = ""
           prefix = line_split.last unless line_str[line_str.length-1].chr =~ /:|\.|>/
           offset_at_line = doc.cursor_line_offset - prefix.length
+          log("line_split: #{line_split}")
+          log("prefix: #{prefix} offset: #{offset_at_line}")
           doc_str = doc.to_s[0..(doc.cursor_offset-prefix.length-1)] + doc.to_s[doc.cursor_offset..(doc.to_s.length-1)]
           File.open(path, "wb") {|f| f.print doc_str }
           completions = get_completions(path, prefix, offset_at_line)
