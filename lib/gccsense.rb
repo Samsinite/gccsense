@@ -180,7 +180,7 @@ module Redcar
         result.each do |item|
           if item =~ /^completion: #{prefix}/
             item_a = item.split(" ")            
-            if item_a[2].length > 25
+            if item_a[2].length > 35
               completions << [item_a[1], item_a[2][0...35] + "..."]
             else
               completions << [item_a[1], item_a[2]]
