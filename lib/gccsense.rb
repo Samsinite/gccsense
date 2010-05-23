@@ -132,10 +132,8 @@ module Redcar
           prefix = ""
           prefix = line_split.last unless line_str[line_str.length-1].chr =~ /:|\.|>/
           offset_at_line = doc.cursor_line_offset - prefix.length
-          doc.replace(doc.cursor_offset - prefix.length, prefix.length, "")                
-          File.open(path, "wb") {|f| f.print doc.to_s }
-          doc.replace(doc.cursor_offset, 0, prefix)
-          doc.cursor_offset = doc.cursor_offset + prefix.length
+          doc_str = doc.to_s[0..(doc.cursor_offset-prefix.length-1)] + doc.to_s[doc.cursor_offset..(doc.to_s.length-1)]
+          File.open(path, "wb") {|f| f.print doc_str }
           completions = get_completions(path, prefix, offset_at_line)
           
           cur_doc = doc
@@ -157,7 +155,7 @@ module Redcar
           menu = ApplicationSWT::Menu.new(window.controller, builder.menu, nil, Swt::SWT::POP_UP)
           menu.move(absolute_x, absolute_y)
           menu.show
-          FileUtils.rm(path)
+#          FileUtils.rm(path)
         end
       end
       
