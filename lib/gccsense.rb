@@ -124,18 +124,15 @@ module Redcar
       
       def execute
         path = doc.mirror.path.split(/\/|\\/)
-        log(path.join("/"))
         if path.last.split(".").last =~ /h|c|cpp|cc|cxx|CPP|CC|CXX/
           path[path.length-1]= ".gccsense." + path.last
           path = path.join("/")
           line_str = doc.get_line(doc.cursor_line)
-          line_str = line_str[0..(line_str.length-2)]
+          line_str = line_str[0..doc.cursor_line_offset].rstrip
           line_split = line_str.split(/::|\.|->/)        
           prefix = ""
           prefix = line_split.last unless line_str[line_str.length-1].chr =~ /:|\.|>/
           offset_at_line = doc.cursor_line_offset - prefix.length
-          log("line_split: #{line_split}")
-          log("prefix: #{prefix} offset: #{offset_at_line}")
           doc_str = doc.to_s[0..(doc.cursor_offset-prefix.length-1)] + doc.to_s[doc.cursor_offset..(doc.to_s.length-1)]
           File.open(path, "wb") {|f| f.print doc_str }
           completions = get_completions(path, prefix, offset_at_line)
@@ -190,7 +187,7 @@ module Redcar
             end
           end
         end
-        completions        
+        completions.uniq
       end
 
       def log(message)
