@@ -127,15 +127,24 @@ module Redcar
         if path.last.split(".").last =~ /h|c|cpp|cc|cxx|CPP|CC|CXX/
           path[path.length-1]= ".gccsense." + path.last
           path = path.join("/")
-          line_str = doc.get_line(doc.cursor_line)
-          line_str = line_str[0..doc.cursor_line_offset].rstrip
+          cursor_line_number = doc.cursor_line
+          cursor_line_str = doc.get_line(cursor_line_number)
+          cursor_line_offset = doc.cursor_line_offset
+          cursor_offset = doc.cursor_offset
+          cursor_line_end_offset = doc.cursor_line_end_offset
+          line_str = cursor_line_str.rstrip
+          new_line_length = cursor_line_str.length - line_str.length
+          line_end_length = line_str.length - cursor_line_offset
+          line_str = line_str[0..(cursor_line_offset-1)]          
           line_split = line_str.split(/::|\.|->/)        
           prefix = ""
           prefix = line_split.last unless line_str[line_str.length-1].chr =~ /:|\.|>/
-          offset_at_line = doc.cursor_line_offset - prefix.length
-          doc_str = doc.to_s[0..(doc.cursor_offset-prefix.length-1)] + doc.to_s[doc.cursor_offset..(doc.to_s.length-1)]
+          prefix_start_offset = doc.cursor_line_offset - prefix.length
+
+          doc_str = doc.to_s[0..(cursor_offset-prefix.length-1)] + doc.to_s[(cursor_line_end_offset-new_line_length)..(doc.to_s.length-1)]
+          
           File.open(path, "wb") {|f| f.print doc_str }
-          completions = get_completions(path, prefix, offset_at_line)
+          completions = get_completions(path, prefix, prefix_start_offset)
           
           cur_doc = doc
           builder = Menu::Builder.new do
